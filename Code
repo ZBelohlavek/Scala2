@@ -1,0 +1,104 @@
+import scala.util.Random
+
+// Define the Animal hierarchy
+abstract class Animal(val name: String) {
+  def sleep(): Unit = println(s"$name goes to sleep.")
+  def eat(): Unit
+  def play(): Unit
+  def makeNoise(): Unit
+}
+
+class Feline(name: String) extends Animal(name) {
+  def eat(): Unit = println(s"$name the Cat eats.")
+  def play(): Unit = println(s"$name the Cat plays and chases their tail.")
+  def makeNoise(): Unit = println(s"$name the Cat meows.")
+}
+
+class Canine(name: String) extends Animal(name) {
+  def eat(): Unit = println(s"$name the Dog eats.")
+  def play(): Unit = println(s"$name the Dog fetches the ball.")
+  def makeNoise(): Unit = println(s"$name the Dog barks.")
+}
+
+// Define the Staff hierarchy
+trait Staff {
+  def arrive(): Unit
+  def lunch(): Unit
+  def leave(): Unit
+}
+
+class Manager(name: String) extends Staff {
+  def arrive(): Unit = println(s"$name the Manager arrives and opens the store.")
+  def lunch(): Unit = println(s"$name the Manager takes a lunch break.")
+  def leave(): Unit = println(s"$name the Manager leaves and closes the store.")
+  def openStore(animals: List[Animal]): Unit = {
+    println(s"$name opens the store.")
+    animals.foreach(_.makeNoise())
+  }
+  def closeStore(animals: List[Animal]): Unit = {
+    println(s"$name closes the store.")
+    animals.foreach(_.sleep())
+  }
+}
+
+class Clerk(name: String) extends Staff {
+  def arrive(): Unit = println(s"$name the Clerk arrives.")
+  def lunch(): Unit = println(s"$name the Clerk takes a lunch break.")
+  def leave(): Unit = println(s"$name the Clerk leaves.")
+  def feedAnimals(animals: List[Animal]): Unit = {
+    println(s"$name feeds the animals.")
+    animals.foreach(_.eat())
+  }
+  def playAnimals(animals: List[Animal]): Unit = {
+    println(s"$name plays with the animals.")
+    animals.foreach(_.play())
+  }
+  def sellAnimals(animals: List[Animal]): List[Animal] = {
+    println(s"$name sells some of the animals.")
+    animals.map { animal =>
+      if (Random.nextInt(100) < 20) {
+        val newAnimal = animal match {
+          case _: Feline => new Feline(s"NewCat${Random.nextInt(100)}")
+          case _: Canine => new Canine(s"NewDog${Random.nextInt(100)}")
+        }
+        println(s"${animal.name} was sold. Replacing with ${newAnimal.name}.")
+        newAnimal
+      } else animal
+    }
+  }
+}
+
+// Define the Clock
+class Clock {
+  def announceHour(hour: Int, action: () => Unit): Unit = {
+    println(f"$hour%04d: ")
+    action()
+  }
+}
+
+// Simulate the pet store
+object PetStoreSimulation extends App {
+  val animals = List(new Feline("Cookie"), new Feline("Muffin"), new Feline("Whiskers"), 
+                     new Canine("Buddy"), new Canine("Rex"), new Canine("Fido"))
+  val manager = new Manager("Alice")
+  val clerk = new Clerk("Bob")
+
+  // Placeholder for a simplified clock mechanism
+  def simulateDay(day: Int): Unit = {
+    println(s"Day $day begins.")
+    manager.arrive()
+    manager.openStore(animals)
+    clerk.arrive()
+    clerk.feedAnimals(animals)
+    clerk.playAnimals(animals)
+    manager.lunch()
+    clerk.lunch()
+    val updatedAnimals = clerk.sellAnimals(animals)
+    clerk.leave()
+    manager.closeStore(updatedAnimals)
+    manager.leave()
+    println(s"Day $day ends.\n")
+  }
+
+  (1 to 3).foreach(simulateDay)
+}
